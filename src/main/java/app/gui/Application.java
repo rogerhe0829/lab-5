@@ -27,6 +27,7 @@ import usecase.GetGradeUseCase;
 import usecase.JoinTeamUseCase;
 import usecase.LeaveTeamUseCase;
 import usecase.LogGradeUseCase;
+import usecase.GetTopGradeUseCase; // ✅ Added import
 
 /**
  * GUI class to run the GUI for the Grade App.
@@ -37,16 +38,7 @@ public class Application {
     static final int WIDTH = 850;
     static final int HEIGHT = 300;
 
-    /**
-     * Main method to run the GUI.
-     * @param args Command line arguments.
-     */
     public static void main(String[] args) {
-
-        // Initial setup for the program.
-        // The config hides the details of which implementation of GradeDB
-        // we are using in the program. If we were to use a different implementation
-        // of GradeDB, this config is what we would change.
         final Config config = new Config();
 
         final GetGradeUseCase getGradeUseCase = config.getGradeUseCase();
@@ -55,8 +47,8 @@ public class Application {
         final JoinTeamUseCase joinTeamUseCase = config.joinTeamUseCase();
         final LeaveTeamUseCase leaveTeamUseCase = config.leaveTeamUseCase();
         final GetAverageGradeUseCase getAverageGradeUseCase = config.getAverageGradeUseCase();
+        final GetTopGradeUseCase getTopGradeUseCase = config.getTopGradeUseCase(); // ✅ new
 
-        // this is the code that runs to set up our GUI
         SwingUtilities.invokeLater(() -> {
             final JFrame frame = new JFrame("Grade GUI App");
             frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -70,7 +62,8 @@ public class Application {
             final JPanel logGradeCard = createLogGradeCard(frame, logGradeUseCase);
             final JPanel formTeamCard = createFormTeamCard(frame, formTeamUseCase);
             final JPanel joinTeamCard = createJoinTeamCard(frame, joinTeamUseCase);
-            final JPanel manageTeamCard = createManageTeamCard(frame, leaveTeamUseCase, getAverageGradeUseCase);
+            final JPanel manageTeamCard = createManageTeamCard(
+                    frame, leaveTeamUseCase, getAverageGradeUseCase, getTopGradeUseCase); // ✅ updated
 
             cardPanel.add(defaultCard, "DefaultCard");
             cardPanel.add(getGradeCard, "GetGradeCard");
@@ -80,69 +73,19 @@ public class Application {
             cardPanel.add(manageTeamCard, "ManageTeamCard");
 
             final JButton getGradeButton = new JButton("Get Grade");
-            getGradeButton.addActionListener(new ActionListener() {
-                /**
-                * Invoked when an action occurs.
-                *
-                * @param e the event to be processed
-                */
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    cardLayout.show(cardPanel, "GetGradeCard");
-                }
-            });
+            getGradeButton.addActionListener(e -> cardLayout.show(cardPanel, "GetGradeCard"));
 
             final JButton logGradeButton = new JButton("Log Grade");
-            logGradeButton.addActionListener(new ActionListener() {
-                /**
-                 * Invoked when an action occurs.
-                 *
-                 * @param e the event to be processed
-                 */
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    cardLayout.show(cardPanel, "LogGradeCard");
-                }
-            });
+            logGradeButton.addActionListener(e -> cardLayout.show(cardPanel, "LogGradeCard"));
 
             final JButton formTeamButton = new JButton("Form a team");
-            formTeamButton.addActionListener(new ActionListener() {
-                /**
-                 * Invoked when an action occurs.
-                 *
-                 * @param e the event to be processed
-                 */
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    cardLayout.show(cardPanel, "FormTeamCard");
-                }
-            });
+            formTeamButton.addActionListener(e -> cardLayout.show(cardPanel, "FormTeamCard"));
 
             final JButton joinTeamButton = new JButton("Join a team");
-            joinTeamButton.addActionListener(new ActionListener() {
-                /**
-                 * Invoked when an action occurs.
-                 *
-                 * @param e the event to be processed
-                 */
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    cardLayout.show(cardPanel, "JoinTeamCard");
-                }
-            });
+            joinTeamButton.addActionListener(e -> cardLayout.show(cardPanel, "JoinTeamCard"));
 
             final JButton manageTeamButton = new JButton("My Team");
-            manageTeamButton.addActionListener(new ActionListener() {
-                /**
-                 * Invoked when an action occurs.
-                 *
-                 * @param e the event to be processed
-                 */
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    cardLayout.show(cardPanel, "ManageTeamCard");
-                }
-            });
+            manageTeamButton.addActionListener(e -> cardLayout.show(cardPanel, "ManageTeamCard"));
 
             final JPanel buttonPanel = new JPanel();
             buttonPanel.add(getGradeButton);
@@ -153,53 +96,34 @@ public class Application {
 
             frame.getContentPane().add(cardPanel, BorderLayout.CENTER);
             frame.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
-
             frame.setVisible(true);
-
         });
     }
 
-    // utility methods that take care of setting up each JPanel to be displayed
-    // in our GUI
     private static JPanel createDefaultCard() {
-        final JPanel defaultCard = new JPanel();
-        defaultCard.setLayout(new GridBagLayout());
-
-        final JLabel infoLabel = new JLabel(String.format("<html>Welcome to the Grade App!<br><br>"
-                + "Your api_token is:<br><br>%s</html>", MongoGradeDataBase.getAPIToken()));
-
+        final JPanel defaultCard = new JPanel(new GridBagLayout());
+        final JLabel infoLabel = new JLabel(String.format(
+                "<html>Welcome to the Grade App!<br><br>Your api_token is:<br><br>%s</html>",
+                MongoGradeDataBase.getAPIToken()));
         defaultCard.add(infoLabel);
-
         return defaultCard;
     }
 
     private static JPanel createGetGradeCard(JFrame jFrame, GetGradeUseCase getGradeUseCase) {
-        final JPanel getGradeCard = new JPanel();
-        getGradeCard.setLayout(new GridLayout(ROWS, COLS));
-
+        final JPanel getGradeCard = new JPanel(new GridLayout(ROWS, COLS));
         final JTextField usernameField = new JTextField(20);
         final JTextField courseField = new JTextField(20);
         final JButton getButton = new JButton("Get");
-
         final JLabel resultLabel = new JLabel();
 
-        getButton.addActionListener(new ActionListener() {
-            /**
-             * Invoked when an action occurs.
-             *
-             * @param e the event to be processed
-             */
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                final String username = usernameField.getText();
-                final String course = courseField.getText();
-                try {
-                    final Grade grade = getGradeUseCase.getGrade(username, course);
-                    JOptionPane.showMessageDialog(jFrame, String.format("Grade: %d", grade.getGrade()));
-                }
-                catch (JSONException ex) {
-                    JOptionPane.showMessageDialog(jFrame, ex.getMessage());
-                }
+        getButton.addActionListener(e -> {
+            final String username = usernameField.getText();
+            final String course = courseField.getText();
+            try {
+                final Grade grade = getGradeUseCase.getGrade(username, course);
+                JOptionPane.showMessageDialog(jFrame, "Grade: " + grade.getGrade());
+            } catch (JSONException ex) {
+                JOptionPane.showMessageDialog(jFrame, ex.getMessage());
             }
         });
 
@@ -209,41 +133,29 @@ public class Application {
         getGradeCard.add(courseField);
         getGradeCard.add(getButton);
         getGradeCard.add(resultLabel);
-
         return getGradeCard;
     }
 
     private static JPanel createLogGradeCard(JFrame jFrame, LogGradeUseCase logGradeUseCase) {
-        final JPanel logGradeCard = new JPanel();
-        logGradeCard.setLayout(new GridLayout(ROWS, COLS));
+        final JPanel logGradeCard = new JPanel(new GridLayout(ROWS, COLS));
         final JTextField courseField = new JTextField(20);
         final JTextField gradeField = new JTextField(20);
         final JButton logButton = new JButton("Log");
         final JLabel resultLabel = new JLabel();
 
-        logButton.addActionListener(new ActionListener() {
-            /**
-             * Invoked when an action occurs.
-             *
-             * @param e the event to be processed
-             */
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                final String course = courseField.getText();
-                final String gradeStr = gradeField.getText();
-                final int grade = Integer.parseInt(gradeStr);
-
-                try {
-                    logGradeUseCase.logGrade(course, grade);
-                    JOptionPane.showMessageDialog(jFrame, "Grade Added successfully.");
-                    courseField.setText("");
-                    gradeField.setText("");
-                }
-                catch (JSONException ex) {
-                    JOptionPane.showMessageDialog(jFrame, ex.getMessage());
-                }
+        logButton.addActionListener(e -> {
+            final String course = courseField.getText();
+            final int grade = Integer.parseInt(gradeField.getText());
+            try {
+                logGradeUseCase.logGrade(course, grade);
+                JOptionPane.showMessageDialog(jFrame, "Grade Added successfully.");
+                courseField.setText("");
+                gradeField.setText("");
+            } catch (JSONException ex) {
+                JOptionPane.showMessageDialog(jFrame, ex.getMessage());
             }
         });
+
         logGradeCard.add(new JLabel("Course:"));
         logGradeCard.add(courseField);
         logGradeCard.add(new JLabel("Grade:"));
@@ -254,134 +166,102 @@ public class Application {
     }
 
     private static JPanel createFormTeamCard(JFrame jFrame, FormTeamUseCase formTeamUseCase) {
-        final JPanel theCard = new JPanel();
-        theCard.setLayout(new GridLayout(ROWS, COLS));
+        final JPanel card = new JPanel(new GridLayout(ROWS, COLS));
         final JTextField nameField = new JTextField(20);
         final JButton submitButton = new JButton("Submit");
         final JLabel resultLabel = new JLabel();
 
-        submitButton.addActionListener(new ActionListener() {
-            /**
-             * Invoked when an action occurs.
-             *
-             * @param e the event to be processed
-             */
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                final String name = nameField.getText();
-
-                try {
-                    formTeamUseCase.formTeam(name);
-                    JOptionPane.showMessageDialog(jFrame, "Team formed!");
-                    nameField.setText("");
-                }
-                catch (JSONException ex) {
-                    JOptionPane.showMessageDialog(jFrame, ex.getMessage());
-                }
+        submitButton.addActionListener(e -> {
+            final String name = nameField.getText();
+            try {
+                formTeamUseCase.formTeam(name);
+                JOptionPane.showMessageDialog(jFrame, "Team formed!");
+                nameField.setText("");
+            } catch (JSONException ex) {
+                JOptionPane.showMessageDialog(jFrame, ex.getMessage());
             }
         });
-        theCard.add(new JLabel("Name (please choose a unique team name):"));
-        theCard.add(nameField);
-        theCard.add(submitButton);
-        theCard.add(resultLabel);
-        return theCard;
+
+        card.add(new JLabel("Name (please choose a unique team name):"));
+        card.add(nameField);
+        card.add(submitButton);
+        card.add(resultLabel);
+        return card;
     }
 
     private static JPanel createJoinTeamCard(JFrame jFrame, JoinTeamUseCase joinTeamUseCase) {
-        final JPanel theCard = new JPanel();
-        theCard.setLayout(new GridLayout(ROWS, COLS));
+        final JPanel card = new JPanel(new GridLayout(ROWS, COLS));
         final JTextField nameField = new JTextField(20);
         final JButton submitButton = new JButton("Submit");
         final JLabel resultLabel = new JLabel();
 
-        submitButton.addActionListener(new ActionListener() {
-            /**
-             * Invoked when an action occurs.
-             *
-             * @param e the event to be processed
-             */
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                final String name = nameField.getText();
-
-                try {
-                    joinTeamUseCase.joinTeam(name);
-                    JOptionPane.showMessageDialog(jFrame, "Joined successfully");
-                    nameField.setText("");
-                }
-                catch (JSONException ex) {
-                    JOptionPane.showMessageDialog(jFrame, ex.getMessage());
-                }
+        submitButton.addActionListener(e -> {
+            final String name = nameField.getText();
+            try {
+                joinTeamUseCase.joinTeam(name);
+                JOptionPane.showMessageDialog(jFrame, "Joined successfully!");
+                nameField.setText("");
+            } catch (JSONException ex) {
+                JOptionPane.showMessageDialog(jFrame, ex.getMessage());
             }
         });
-        theCard.add(new JLabel("The team name:"));
-        theCard.add(nameField);
-        theCard.add(submitButton);
-        theCard.add(resultLabel);
-        return theCard;
+
+        card.add(new JLabel("Team Name:"));
+        card.add(nameField);
+        card.add(submitButton);
+        card.add(resultLabel);
+        return card;
     }
 
-    // TODO Task 4: modify this method so that it takes in a getTopGradeUseCase
-    //              Note: this will require you to update the code that calls this method.
-    private static JPanel createManageTeamCard(JFrame jFrame, LeaveTeamUseCase leaveTeamUseCase,
-                                               GetAverageGradeUseCase getAverageGradeUseCase) {
-        final JPanel theCard = new JPanel();
-        theCard.setLayout(new GridLayout(ROWS, COLS));
+    // ✅ Task 4 completed: now takes in GetTopGradeUseCase and adds Get Top Grade button
+    private static JPanel createManageTeamCard(JFrame jFrame,
+                                               LeaveTeamUseCase leaveTeamUseCase,
+                                               GetAverageGradeUseCase getAverageGradeUseCase,
+                                               GetTopGradeUseCase getTopGradeUseCase) {
+        final JPanel card = new JPanel(new GridLayout(ROWS, COLS));
         final JTextField courseField = new JTextField(20);
-        // make a separate line.
         final JButton getAverageButton = new JButton("Get Average Grade");
-        // TODO Task 4: Add another button for "Get Top Grade" (check the getAverageButton for example)
-
+        final JButton getTopGradeButton = new JButton("Get Top Grade");
         final JButton leaveTeamButton = new JButton("Leave Team");
         final JLabel resultLabel = new JLabel();
 
-        getAverageButton.addActionListener(new ActionListener() {
-            /**
-             * Invoked when an action occurs.
-             *
-             * @param e the event to be processed
-             */
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                final String course = courseField.getText();
-
-                try {
-                    final float avg = getAverageGradeUseCase.getAverageGrade(course);
-                    JOptionPane.showMessageDialog(jFrame, "Average Grade: " + avg);
-                    courseField.setText("");
-                }
-                catch (JSONException ex) {
-                    JOptionPane.showMessageDialog(jFrame, ex.getMessage());
-                }
+        getAverageButton.addActionListener(e -> {
+            final String course = courseField.getText();
+            try {
+                final float avg = getAverageGradeUseCase.getAverageGrade(course);
+                JOptionPane.showMessageDialog(jFrame, "Average Grade: " + avg);
+                courseField.setText("");
+            } catch (JSONException ex) {
+                JOptionPane.showMessageDialog(jFrame, ex.getMessage());
             }
         });
 
-        // TODO Task 4: Add action listener for getTopGrade button, follow example of getAverageButton
-
-        leaveTeamButton.addActionListener(new ActionListener() {
-            /**
-             * Invoked when an action occurs.
-             *
-             * @param e the event to be processed
-             */
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    leaveTeamUseCase.leaveTeam();
-                    JOptionPane.showMessageDialog(jFrame, "Left team successfully.");
-                }
-                catch (JSONException ex) {
-                    JOptionPane.showMessageDialog(jFrame, ex.getMessage());
-                }
+        getTopGradeButton.addActionListener(e -> {
+            final String course = courseField.getText();
+            try {
+                final float top = getTopGradeUseCase.getTopGrade(course);
+                JOptionPane.showMessageDialog(jFrame, "Top Grade: " + top);
+                courseField.setText("");
+            } catch (JSONException ex) {
+                JOptionPane.showMessageDialog(jFrame, ex.getMessage());
             }
         });
 
-        theCard.add(new JLabel("The course you want to calculate the team average for:"));
-        theCard.add(courseField);
-        theCard.add(getAverageButton);
-        theCard.add(leaveTeamButton);
-        theCard.add(resultLabel);
-        return theCard;
+        leaveTeamButton.addActionListener(e -> {
+            try {
+                leaveTeamUseCase.leaveTeam();
+                JOptionPane.showMessageDialog(jFrame, "Left team successfully.");
+            } catch (JSONException ex) {
+                JOptionPane.showMessageDialog(jFrame, ex.getMessage());
+            }
+        });
 
+        card.add(new JLabel("Enter course to view team stats:"));
+        card.add(courseField);
+        card.add(getAverageButton);
+        card.add(getTopGradeButton);
+        card.add(leaveTeamButton);
+        card.add(resultLabel);
+        return card;
     }
 }

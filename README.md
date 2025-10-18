@@ -236,7 +236,7 @@ there are certain things that the Grade API can't currently do for us.
 for `Get Average Grade` isn't implemented yet — it will just display `Average Grade: 0.0`. 
 2. As a team, your goal is to work together to implement this feature and confirm that it works.
 3. Follow the flow from the `getAverage` button defined in the UI code (`app/gui/Application.java`) to reach until the 
-`GetAverageGradeUseCase` in the usecase package. You can do this by setting a breakpoint and running the program in debug mode.
+`GetAverageGradeUseCase` in the usecase package. You can do this by setting a breakpoint and running the program indebug mode.
 4. You will need to finish implementing the logic of calculating the average grade (Task 3a in the code) in the `GetAverageGradeUseCase` class.
 The logic is partly implemented, but what is written depends on the `getMyTeam` method (Task 3b in the code), which needs to be implemented.
 Follow the hints provided in this method to complete its implementation. Note the API response will be in `JSON` format which you will need to parse.
